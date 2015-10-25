@@ -14,7 +14,6 @@ AM_INTHEADER *header;
 		return(FALSE);
 	}
 	int recSize;
-	int i;
 
 	recSize = header->attrLength + AM_si;
 
@@ -31,10 +30,9 @@ AM_INTHEADER *header;
 
 
 /* Fills the header and inserts a key into a new root */
-BUF_AM_InitializePage(pageBuf,pageNum1,value,attrLength,maxKeys)
+BUF_AM_InitializePage(pageBuf,pageNum1,attrLength,maxKeys)
 char *pageBuf;/* buffer to new root */
 int pageNum1;/* pagenumbers of it's child*/
-char *value; /* attr value to be inserted */
 short attrLength,maxKeys; /* some info about the header */
 
 {
@@ -50,12 +48,44 @@ short attrLength,maxKeys; /* some info about the header */
 
 }
 
-
-
-AM_BulkLoad(inputfile,filedesc)
-const char* inputfile;
-int filedesc;
+BUF_MAXKEYS_attrLength(fileDesc,maxkeys,attrlength)
+short* maxkeys;
+short* attrlength;
+int fileDesc;
 {
+	char* pageBuf;
+	int pageNum;
+	AM_LEAFHEADER lhead,*lheader; /* local pointer to leaf header */
+	AM_INTHEADER ihead,*iheader; /* local pointer to internal node header */
+  /* initialise the headers */	
+	lheader = &lhead;
+	iheader = &ihead;
+        /* get the root of the B+ tree */
+	int errVal = PF_GetFirstPage(fileDesc,&pageNum,&pageBuf);
+	AM_Check;
+	if (*pageBuf == 'l' ) 
+		/* if root is a leaf page */
+	{
+		bcopy(pageBuf,lheader,AM_sl);
+		*maxkeys=lheader->maxKeys;
+		*attrlength=lheader->attrLength;
+	}
+	else /* root is not a leaf */
+	{
+		bcopy(pageBuf,iheader,AM_sint);
+		*maxkeys=iheader->maxKeys;
+		*attrlength=iheader->attrLength;
+	}
+	errVal = PF_UnfixPage(fileDesc,pageNum,FALSE);
+	AM_Check;
+}
+
+AM_BulkLoad(inputfile,fileDesc)
+const char* inputfile;
+int fileDesc;
+{
+	short maxKeys,attrLength;
+	BUF_MAXKEYS_attrLength(fileDesc,&maxKeys,&attrLength);
 	FILE *fp;
 	fp = fopen(inputfile, "r");
 	int recID,value;
@@ -68,4 +98,5 @@ int filedesc;
 		
 		printf("%d %d \n",recID,value);
 	}
+	fclose(fp);
 }
