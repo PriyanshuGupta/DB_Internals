@@ -16,10 +16,12 @@ AM_INTHEADER *header;
 	int recSize;
 
 	recSize = header->attrLength + AM_si;
-
+	
+		//~ printf("HHx \n");
 	/* copy the attribute value into the appropriate place */
 	bcopy(value,pageBuf + AM_sint + header->numKeys*recSize + AM_si,header->attrLength);
 
+		//~ printf("HHx \n");
 	/* copy the pagenumber of the child */
 	bcopy((char *)&pageNum,pageBuf + AM_sint + (header->numKeys+1)*recSize,AM_si);
 
@@ -64,7 +66,7 @@ short attrLength,maxKeys; /* some info about the header */
 	tempheader->pageType = 'i';
 	tempheader->attrLength = attrLength;
 	tempheader->maxKeys = maxKeys;
-	tempheader->numKeys = 1;
+	tempheader->numKeys = 0;
 	bcopy((char *)&pageNum1,pageBuf + AM_sint ,AM_si);
 	bcopy(tempheader,pageBuf,AM_sint);
 
@@ -122,28 +124,48 @@ short attrLength,maxKeys;
 		{
 			break;
 		}
-		AM_INTHEADER head,*header;
-		header=&head;
-		bcopy(pageBuf,header,AM_sint);
 		if(newNode==TRUE)
 		{
 			count++;
-			fprintf(fp1, "%d %d", pageID, value);//print header ones to file output.txt
 			errVal=PF_AllocPage(filedesc, &pageNum, &pageBuf);
 			BUF_AM_InitializePage(pageBuf, pageID, attrLength, maxKeys);
+			
+			fprintf(fp1, "%d %d", pageNum, value);//print header ones to file output.txt
 			newNode=FALSE;
 		}
-		bool temp = BUF_AM_AddtoIntPage(pageBuf, (char *)value, pageID, header);
+		AM_INTHEADER head,*header;
+		header=&head;
+		bcopy(pageBuf,header,AM_sint);
+		//~ printf("%d \n",header->numKeys);
+		char * VLUE=(char*)&value;
+		bool temp = BUF_AM_AddtoIntPage(pageBuf, VLUE, pageID, header);
+		bcopy(header,pageBuf,AM_sint);
+		//~ printf("HH \n");
 		if(temp==FALSE){
+			errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
 			count++;
-			fprintf(fp1, "%d %d", pageID, value);//print header ones to file output.txt
 			errVal=PF_AllocPage(filedesc, &pageNum, &pageBuf);
 			BUF_AM_InitializePage(pageBuf, pageID, attrLength, maxKeys);
-			newNode=false;
+			fprintf(fp1, "%d %d", pageNum, value);//print header ones to file output.txt
+			newNode=FALSE;
 		}
 	}
-	if(count==1) return(TRUE);
-	else return(FALSE);
+	fclose(fp1);
+	if(count==1){ 
+		char* pageBufR;
+		int pageNumR;
+					/* get the root of the B+ tree */
+		int errVal = PF_GetFirstPage(filedesc,&pageNumR,&pageBufR);
+		AM_Check;
+		bcopy(pageBuf,pageBufR,PF_PAGE_SIZE);
+		errVal = PF_UnfixPage(filedesc,pageNumR,FALSE);
+		errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
+		AM_Check;
+		return(FALSE);
+		}
+	
+	errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
+	return(TRUE);
 }
 
 BUF_AM_Recursion(filedesc, attrLength, maxKeys)
@@ -152,6 +174,8 @@ short attrLength, maxKeys;
 {
 	bool check=TRUE;
 	while(check){
+		//~ int x;
+		//~ scanf("%d",&x);
 		check=BUF_AM_Create(filedesc, attrLength, maxKeys);
 		remove("inputfile");
 		rename("outputfile", "inputfile");
@@ -162,7 +186,10 @@ AM_BulkLoad(inputfile,fileDesc)
 const char* inputfile;
 int fileDesc;
 {
-	printf("HHH");
+	
+			
+	
+	//~ printf("HHH");
 	short maxKeys,attrLength;
 	BUF_MAXKEYS_attrLength(fileDesc,&maxKeys,&attrLength);
 	
@@ -179,14 +206,22 @@ int fileDesc;
 	int pageNum;
 	bool leaffinished=FALSE;
 	bool valueInserted=FALSE;
+	
+	//Make a dummy!
+	errVal=PF_AllocPage(fileDesc, &pageNum, &pageBuf);
+	AM_Check;
+	errVal=PF_UnfixPage(fileDesc,pageNum,FALSE);
+	AM_Check;
+	//End dummy
+	
 	//Initialize a leaf
 	
 	errVal=PF_AllocPage(fileDesc, &pageNum, &pageBuf);
 	AM_Check;
-	printf("HH %d \n",pageNum);
+	//~ printf("HH %d \n",pageNum);
 	//~ errVal=PF_GetThisPage(fileDesc, pageNum, &pageBuf);
 	//~ AM_Check;
-	printf("A2 \n");
+	//~ printf("A2 \n");
 	BUF_AM_InitializeLeafPage(pageBuf,attrLength, maxKeys);
 	AM_Check;
 	while(!feof(fp)){
@@ -213,7 +248,7 @@ int fileDesc;
 		
 		//~ //Get the value of numKeys
 		int numKeys=header->numKeys;
-		printf("%d \n",numKeys);
+		//~ printf("%d \n",numKeys);
 		if(value==prevValue)
 		{
 			leaffinished=AM_InsertintoLeaf(pageBuf,attrLength,VLUE,recID,numKeys,AM_FOUND);
@@ -225,21 +260,24 @@ int fileDesc;
 		if(leaffinished==FALSE)
 		{
 			//Initialize new leaf
-			errVal = PF_UnfixPage(fileDesc,pageNum,FALSE);
-			AM_Check;
-			
+			int pageNumold=pageNum;
+			char* pageBufold=pageBuf;
+			int errVal;
 			errVal=PF_AllocPage(fileDesc, &pageNum, &pageBuf);
 			AM_Check;
-			//~ errVal=PF_GetThisPage(fileDesc, pageNum, &pageBuf);
-			//~ AM_Check;
 			BUF_AM_InitializeLeafPage(pageBuf,attrLength, maxKeys);
 			header->nextLeafPage=pageNum; //Set pointer from prev to new
+			bcopy(header,pageBufold,AM_sl);
+			errVal=PF_UnfixPage(fileDesc,pageNumold,FALSE);
+			AM_Check;
 			leaffinished=AM_InsertintoLeaf(pageBuf,attrLength,VLUE,recID,1,AM_NOT_FOUND);
 			prevValue=-1;
 			fprintf(fp1,"%d %d \n",pageNum,value); //Print pageNumber and Value into inputfile
 		}	
 		//~ printf("%d %d \n",recID,value);
 	}
+	errVal = PF_UnfixPage(fileDesc,pageNum,FALSE);
+	fclose(fp1);
 	BUF_AM_Recursion(fileDesc,attrLength,maxKeys);
 	fclose(fp);
 }

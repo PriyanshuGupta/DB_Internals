@@ -1,2 +1,2 @@
-for i in range(1,350):
-	print str(i) + " " + str(i+1)
+for i in range(1,2000):
+	print str(i) + " " + str(i)

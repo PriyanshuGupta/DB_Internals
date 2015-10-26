@@ -147,7 +147,7 @@ int testval;
 	/* destroy everything */
 	printf("closing down\n");
 	PF_CloseFile(fd);
-		AM_DestroyIndex(RELNAME,0);
+	AM_DestroyIndex(RELNAME,0);
 
 	printf("test3 done!\n");
 }
