@@ -100,7 +100,7 @@ int fileDesc;
 		*maxkeys=iheader->maxKeys;
 		*attrlength=iheader->attrLength;
 	}
-	errVal = PF_UnfixPage(fileDesc,pageNum,FALSE);
+	errVal = PF_UnfixPage(fileDesc,pageNum,TRUE);
 	AM_Check;
 }
 
@@ -146,7 +146,7 @@ short attrLength,maxKeys;
 		}
 		//~ printf("HH \n");
 		if(temp==FALSE){
-			errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
+			errVal = PF_UnfixPage(filedesc,pageNum,TRUE);
 			count++;
 			errVal=PF_AllocPage(filedesc, &pageNum, &pageBuf);
 			BUF_AM_InitializePage(pageBuf, pageID, attrLength, maxKeys);
@@ -162,13 +162,13 @@ short attrLength,maxKeys;
 		int errVal = PF_GetFirstPage(filedesc,&pageNumR,&pageBufR);
 		AM_Check;
 		bcopy(pageBuf,pageBufR,PF_PAGE_SIZE);
-		errVal = PF_UnfixPage(filedesc,pageNumR,FALSE);
-		errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
+		errVal = PF_UnfixPage(filedesc,pageNumR,TRUE);
+		errVal = PF_UnfixPage(filedesc,pageNum,TRUE);
 		AM_Check;
 		return(FALSE);
 		}
 	
-	errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
+	errVal = PF_UnfixPage(filedesc,pageNum,TRUE);
 	return(TRUE);
 }
 
@@ -269,7 +269,7 @@ int fileDesc;
 			BUF_AM_InitializeLeafPage(pageBuf,attrLength, maxKeys);
 			header->nextLeafPage=pageNum; //Set pointer from prev to new
 			bcopy(header,pageBufold,AM_sl);
-			errVal=PF_UnfixPage(fileDesc,pageNumold,FALSE);
+			errVal=PF_UnfixPage(fileDesc,pageNumold,TRUE);
 			AM_Check;
 			leaffinished=AM_InsertintoLeaf(pageBuf,attrLength,VLUE,recID,1,AM_NOT_FOUND);
 			prevValue=-1;
@@ -277,7 +277,7 @@ int fileDesc;
 		}	
 		//~ printf("%d %d \n",recID,value);
 	}
-	errVal = PF_UnfixPage(fileDesc,pageNum,FALSE);
+	errVal = PF_UnfixPage(fileDesc,pageNum,TRUE);
 	fclose(fp1);
 	BUF_AM_Recursion(fileDesc,attrLength,maxKeys);
 	fclose(fp);
