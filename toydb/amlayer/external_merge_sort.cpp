@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define PKBBUFFERSIZE 1000
+#define PKBBUFFERSIZE 100000001
 
 int pointer;
 

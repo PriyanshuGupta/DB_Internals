@@ -115,6 +115,7 @@ short attrLength,maxKeys;
 	char *pageBuf;
 	int pageID, value;
 	int errVal;
+	bool temp=TRUE; 
 	FILE *fp1;
 	fp1 = fopen("outputfile", "w");// "w" means that we are going to write on this file
 	int count=0;
@@ -133,13 +134,16 @@ short attrLength,maxKeys;
 			fprintf(fp1, "%d %d", pageNum, value);//print header ones to file output.txt
 			newNode=FALSE;
 		}
+		else
+		{
 		AM_INTHEADER head,*header;
 		header=&head;
 		bcopy(pageBuf,header,AM_sint);
 		//~ printf("%d \n",header->numKeys);
 		char * VLUE=(char*)&value;
-		bool temp = BUF_AM_AddtoIntPage(pageBuf, VLUE, pageID, header);
+		temp = BUF_AM_AddtoIntPage(pageBuf, VLUE, pageID, header);
 		bcopy(header,pageBuf,AM_sint);
+		}
 		//~ printf("HH \n");
 		if(temp==FALSE){
 			errVal = PF_UnfixPage(filedesc,pageNum,FALSE);
@@ -186,9 +190,6 @@ AM_BulkLoad(inputfile,fileDesc)
 const char* inputfile;
 int fileDesc;
 {
-	
-			
-	
 	//~ printf("HHH");
 	short maxKeys,attrLength;
 	BUF_MAXKEYS_attrLength(fileDesc,&maxKeys,&attrLength);

@@ -31,7 +31,8 @@ int testval;
 	
 	AM_BulkLoad("file",fd);
 	//~ AM_IndexLoad("file",fd);
-	//~ AM_PrintTree(fd,0,'i');
+	AM_PrintTree(fd,0,'i'); 
+	AM_PrintTree(fd,0,'i'); 
 	numrec= 0;
 	sd = AM_OpenIndexScan(fd,INT_TYPE,sizeof(int),EQ_OP,NULL);
 	while(numrec<1576 && (recnum=AM_FindNextEntry(sd))>= 0){
@@ -50,7 +51,7 @@ int testval;
 	}
 	printf("retrieved %d records\n",numrec);
 	AM_CloseIndexScan(sd);
-
+//~ 
 	/* print out what remains */
    //~ printf("printing between 100 and 150\n");
 	numrec= 0;
