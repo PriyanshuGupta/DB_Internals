@@ -27,7 +27,7 @@ int testval;
 	printf("opening index\n");
 	sprintf(fname,"%s.0",RELNAME);
 	fd = PF_OpenFile(fname);
-
+	
 	AM_BulkLoad("file",fd);
 
 	/* destroy everything */

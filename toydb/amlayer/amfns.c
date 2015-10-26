@@ -45,10 +45,10 @@ int attrLength; /* 4 for 'i' or 'f', 1-255 for 'c' */
 	header = &head;
 	
 	/* Get the filename with extension and create a paged file by that name*/
+	
 	sprintf(indexfName,"%s.%d",fileName,indexNo);
 	errVal = PF_CreateFile(indexfName);
 	AM_Check;
-
 	/* open the new file */
 	fileDesc = PF_OpenFile(indexfName);
 	if (fileDesc < 0) 
@@ -60,7 +60,6 @@ int attrLength; /* 4 for 'i' or 'f', 1-255 for 'c' */
 	/* allocate a new page for the root */
 	errVal = PF_AllocPage(fileDesc,&pageNum,&pageBuf);
 	AM_Check;
-	
 	/* initialise the header */
 	header->pageType = 'l';
 	header->nextLeafPage = AM_NULL_PAGE;
@@ -81,7 +80,6 @@ int attrLength; /* 4 for 'i' or 'f', 1-255 for 'c' */
 	
 	errVal = PF_UnfixPage(fileDesc,pageNum,TRUE);
 	AM_Check;
-	
 	/* Close the file */
 	errVal = PF_CloseFile(fileDesc);
 	AM_Check;

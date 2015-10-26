@@ -12,6 +12,7 @@ int index;/* index where key is to be inserted */
 int status;/* Whether key is a new key or an old key */
 
 {
+	
 	int recSize;
 	char tempPage[PF_PAGE_SIZE];
 	AM_LEAFHEADER head,*header;
@@ -45,9 +46,11 @@ int status;/* Whether key is a new key or an old key */
 							     + recSize))
 			return(FALSE);
 		else
-		{    
+		{
+			    
 			AM_InsertToLeafNotFound(pageBuf,value,recId,index,
 						header);
+			
 			header->numKeys++;
 			bcopy(header,pageBuf,AM_sl);
 			return(TRUE);
@@ -111,11 +114,11 @@ AM_LEAFHEADER *header;
 	bcopy(pageBuf+AM_sl+(index-1)*recSize + header->attrLength,
 	      (char *)&oldhead, AM_ss);
 
-        /* Update the head of recId list to the new recid to be added */
+	      /* Update the head of recId list to the new recid to be added */
 	bcopy((char *)  &tempPtr,pageBuf+AM_sl + (index-1)*recSize + 
 	       header->attrLength,AM_ss);
 
-        /* Copy the recId*/
+	      /* Copy the recId*/
 	bcopy((char *)&recId,pageBuf + tempPtr,AM_si);
 
 	/* make the old head of list the second on list */
@@ -146,12 +149,15 @@ AM_LEAFHEADER *header;
 	header->keyPtr = header->keyPtr + recSize;
 	
 	/* copy the new key */
+	//~ printf("A2 \n");
 	bcopy(value,pageBuf+AM_sl+(index-1)*recSize,header->attrLength);
 	
+	//~ printf("A2 \n");
 	/* make the head of list NULL*/
 	bcopy((char *)&null,pageBuf+AM_sl+(index-1)*recSize+
 	       header->attrLength,AM_ss);
 	
+	//~ printf("A2 \n");
 	/* Now insert as if key were old key */
 	AM_InsertToLeafFound(pageBuf,recId,index,header);
 }
