@@ -1,4 +1,3 @@
-#include "hashmap_reader.c"
 #include <stdio.h>
 
 main(){
@@ -10,6 +9,6 @@ main(){
 	
 	printf("Creating hashing structure\n");
 	HM_Create("test_hashing");
-	HM_Destroy("test_hashing");
+	//~ HM_Destroy("test_hashing");
 	
 }

@@ -144,7 +144,7 @@ HM_Search(int fileDesc,int val)
 		HM_PAGEHEADER head,*header;
 		header = &head;
 		bcopy(pagebuf,header,HMHEADERSIZE);
-		int search = HM_SearchPage(fileDesc, val, pageToFind);
+		int search = HM_SearchPageVal(fileDesc, val, pageToFind);
 		
 		if(search==-1)
 		{
